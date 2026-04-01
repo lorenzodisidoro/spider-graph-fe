@@ -459,6 +459,46 @@
   grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
 }
 
+.results-view-mode {
+  display: flex;
+  gap: 0.6rem;
+  align-items: center;
+  padding: 0.2rem 0.2rem 0.6rem;
+}
+
+.view-mode-button {
+  min-width: 100px;
+}
+
+.view-mode-button.active {
+  border-color: rgba(249, 198, 115, 0.9);
+  background: rgba(249, 198, 115, 0.18);
+}
+
+.results-graph {
+  padding: 1rem;
+}
+
+.graph-container {
+  position: relative;
+  width: 100%;
+  min-height: 540px;
+  max-height: 680px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 1.3rem;
+  background: rgba(10, 18, 31, 0.8);
+  overflow: auto;
+}
+
+.graph-legend {
+  margin-top: 0.75rem;
+  padding: 0.7rem;
+  border-radius: 1rem;
+  background: rgba(255, 255, 255, 0.04);
+  color: #dbe4f5;
+  font-size: 0.8rem;
+}
+
 .result-card {
   display: grid;
   grid-template-columns: auto 1fr;
