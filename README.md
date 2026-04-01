@@ -1,4 +1,43 @@
-# Getting Started with Create React App
+# Spider Graph FE
+
+[![CI](https://github.com/lorenzodisidoro/spider-graph-fe/actions/workflows/ci.yml/badge.svg)](https://github.com/lorenzodisidoro/spider-graph-fe/actions/workflows/ci.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](./LICENSE)
+
+Applicazione React per il crawling di pagine e generazione di PDF tramite spider graph.
+
+## Panoramica
+
+- `src/`: componenti, hook, utilità.
+- `public/`: contenuti statici.
+- `build/`: output di produzione.
+
+## Installazione
+
+```bash
+npm ci
+```
+
+## Sviluppo
+
+```bash
+npm start
+```
+
+## Test
+
+```bash
+npm test
+```
+
+## Build
+
+```bash
+npm run build
+```
+
+---
+
+## Getting Started with Create React App
 
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
 
