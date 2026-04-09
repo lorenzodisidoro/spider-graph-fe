@@ -1,68 +1,18 @@
-import { useMemo, useState } from 'react';
+import { useState } from 'react';
 import { MAX_PAGES_TO_EXPORT } from '../constants.js';
 
 export function ResultsView({
   crawlResult,
   maxDepth,
-  onExportPdf,
+  onExport,
   onReset,
-  isExportingPdf,
+  isExporting,
   pageSelection,
 }) {
-  const [viewMode, setViewMode] = useState('list');
+  const [exportFormat, setExportFormat] = useState('pdf');
   const resultNodes = crawlResult?.nodes ?? [];
   const selectedCount = pageSelection.getSelectedCount();
   const hasReachedLimit = pageSelection.hasReachedLimit();
-
-  const nodePositions = useMemo(() => {
-    if (!resultNodes.length) {
-      return { nodePositions: [], edgePositions: [] };
-    }
-
-    const urlToIndex = new Map(resultNodes.map((node, index) => [node.url, index]));
-
-    const graphNodes = resultNodes.map((node, index) => ({
-      id: index,
-      title: node.title?.trim() || new URL(node.url).hostname.replace(/^www\./, ''),
-      url: node.url,
-    }));
-
-    const graphEdges = [];
-    graphNodes.forEach((node) => {
-      const outgoingUrls = resultNodes[node.id].outgoingUrls || resultNodes[node.id].outgoing || [];
-      outgoingUrls.forEach((destinationUrl) => {
-        const targetIndex = urlToIndex.get(destinationUrl);
-        if (targetIndex !== undefined) {
-          graphEdges.push({ from: node.id, to: targetIndex });
-        }
-      });
-    });
-
-    const total = graphNodes.length;
-    const svgWidth = 950;
-    const svgHeight = 550;
-    const centerX = svgWidth / 2;
-    const centerY = svgHeight / 2;
-    const radius = Math.max(90, Math.min(220, total * 13));
-
-    const nodePositions = graphNodes.map((node, index) => {
-      const angle = (index / total) * Math.PI * 2;
-      return {
-        ...node,
-        x: centerX + Math.cos(angle) * radius,
-        y: centerY + Math.sin(angle) * radius,
-      };
-    });
-
-    const edgePositions = graphEdges.map((edge) => ({
-      ...edge,
-      from: nodePositions[edge.from],
-      to: nodePositions[edge.to],
-    }));
-
-    return { nodePositions, edgePositions };
-  }, [resultNodes]);
-
 
   return (
     <main className="results-shell">
@@ -103,14 +53,25 @@ export function ResultsView({
           <div className="results-actions-card">
             <h2 className="panel-title">Actions</h2>
             <div className="results-actions">
-              <button
-                className="secondary-button"
-                type="button"
-                onClick={onExportPdf}
-                disabled={isExportingPdf || selectedCount === 0}
-              >
-                {isExportingPdf ? 'Generating PDF...' : `Export PDF (${selectedCount})`}
-              </button>
+              <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
+                <select
+                  value={exportFormat}
+                  onChange={(e) => setExportFormat(e.target.value)}
+                  style={{ padding: '8px', borderRadius: '4px', border: '1px solid #ccc' }}
+                >
+                  <option value="pdf">PDF</option>
+                  <option value="txt">TXT</option>
+                  <option value="docx">DOCX</option>
+                </select>
+                <button
+                  className="secondary-button"
+                  type="button"
+                  onClick={() => onExport(exportFormat)}
+                  disabled={isExporting || selectedCount === 0}
+                >
+                  {isExporting ? 'Generating...' : `Export ${exportFormat.toUpperCase()} (${selectedCount})`}
+                </button>
+              </div>
               <button 
                 className="secondary-button" 
                 type="button" 
@@ -135,26 +96,7 @@ export function ResultsView({
         </div>
       </section>
 
-      <section className="results-view-mode">
-        <button
-          className={`secondary-button view-mode-button ${viewMode === 'list' ? 'active' : ''}`}
-          type="button"
-          onClick={() => setViewMode('list')}
-        >
-          List view
-        </button>
-        <button
-          className={`secondary-button view-mode-button ${viewMode === 'graph' ? 'active' : ''}`}
-          type="button"
-          onClick={() => setViewMode('graph')}
-          disabled={resultNodes.length === 0}
-        >
-          Graph view
-        </button>
-      </section>
-
-      {viewMode === 'list' ? (
-        <section className="results-list" aria-label="Indexed pages">
+      <section className="results-list" aria-label="Indexed pages">
           {resultNodes.length === 0 ? (
             <article className="result-card empty-state">
               <h2>No pages returned</h2>
@@ -196,69 +138,6 @@ export function ResultsView({
             })
           )}
         </section>
-      ) : (
-        <section className="results-graph" aria-label="Indexed pages as graph">
-          {resultNodes.length === 0 ? (
-            <article className="result-card empty-state">
-              <h2>No pages returned</h2>
-              <p>The crawl completed successfully, but the API returned an empty index.</p>
-            </article>
-          ) : (
-            <div className="graph-container">
-              <svg viewBox="0 0 950 550" width="100%" height="100%" role="img" aria-label="Crawl graph visualization">
-                <defs>
-                  <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="15" refY="3.5" orient="auto" markerUnits="strokeWidth">
-                    <path d="M0,0 L10,3.5 L0,7" fill="#66b2ff" />
-                  </marker>
-                </defs>
-
-                {nodePositions.edgePositions.map((edge, idx) => (
-                  <line
-                    key={`edge-${idx}`}
-                    x1={edge.from.x}
-                    y1={edge.from.y}
-                    x2={edge.to.x}
-                    y2={edge.to.y}
-                    stroke="rgba(102, 178, 255, 0.6)"
-                    strokeWidth="1.5"
-                    markerEnd="url(#arrowhead)"
-                  />
-                ))}
-
-                {nodePositions.nodePositions.map((node) => (
-                  <g key={`node-${node.id}`}>
-                    <circle
-                      cx={node.x}
-                      cy={node.y}
-                      r="16"
-                      fill="#1e73df"
-                      stroke="#7ab5ff"
-                      strokeWidth="2"
-                    />
-                    <text
-                      x={node.x}
-                      y={node.y + 4}
-                      textAnchor="middle"
-                      fontSize="9"
-                      fill="#ffffff"
-                      fontWeight="700"
-                    >
-                      {String(node.id + 1)}
-                    </text>
-                    <title>{`${node.title} (${node.url})`}</title>
-                  </g>
-                ))}
-              </svg>
-
-              <div className="graph-legend">
-                <p>
-                  Here nodes are numbered by position. Hover a node to see URL detail. Edges are outgoing links.
-                </p>
-              </div>
-            </div>
-          )}
-        </section>
-      )}
     </main>
   );
 }

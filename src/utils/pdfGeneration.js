@@ -2,12 +2,12 @@ import { escapeHtml, convertPlainTextToHtml } from './textProcessing.js';
 import { normalizePageText, sanitizeHtmlForPdf } from './htmlParsing.js';
 import { decompressIfGzipped } from './compression.js';
 
-function buildExportFileName(url) {
+function buildExportFileName(url, format = 'pdf') {
   try {
     const hostname = new URL(url).hostname.replace(/^www\./, '').replaceAll('.', '-');
-    return `spider-graph-${hostname}.pdf`;
+    return `spider-graph-${hostname}.${format}`;
   } catch {
-    return 'spider-graph-export.pdf';
+    return `spider-graph-export.${format}`;
   }
 }
 

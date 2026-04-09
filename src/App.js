@@ -4,7 +4,7 @@ import './App.css';
 import { useFormState } from './hooks/useFormState.js';
 import { useProgressTracking } from './hooks/useProgressTracking.js';
 import { useCrawlSubmit } from './hooks/useCrawlSubmit.js';
-import { usePdfExport } from './hooks/usePdfExport.js';
+import { useExport } from './hooks/useExport.js';
 import { usePageSelection } from './hooks/usePageSelection.js';
 import { initializeCompressionLibraries } from './utils/initCompression.js';
 
@@ -17,7 +17,7 @@ function App() {
   const { form, handleInputChange, getActiveMode } = useFormState();
   const { isSubmitting, error, crawlResult, handleSubmit, completeCrawl, resetCrawl } = useCrawlSubmit();
   const { progress, resetProgress, completeProgress } = useProgressTracking(isSubmitting);
-  const { isExportingPdf, pdfExportProgress, handleExportPdf } = usePdfExport();
+  const { isExporting, exportProgress, handleExport } = useExport();
   const pageSelection = usePageSelection(crawlResult?.nodes?.length ?? 0);
 
   const activeMode = getActiveMode();
@@ -49,18 +49,19 @@ function App() {
     pageSelection.clearSelection();
   };
 
-  const onExportPdf = () => {
-    handleExportPdf(crawlResult, form.maxDepth, pageSelection.selectedPageIndices, () => {
+  const onExport = (format) => {
+    handleExport(format, crawlResult, form.maxDepth, pageSelection.selectedPageIndices, (error) => {
       // Error handling
+      console.error(error);
     });
   };
 
   return (
     <div className="app-shell">
       <PdfExportProgress 
-        isVisible={isExportingPdf} 
-        progress={pdfExportProgress}
-        isComplete={pdfExportProgress === 100}
+        isVisible={isExporting} 
+        progress={exportProgress}
+        isComplete={exportProgress === 100}
       />
       
       <div className="ambient ambient-left" />
@@ -72,9 +73,9 @@ function App() {
         <ResultsView
           crawlResult={crawlResult}
           maxDepth={form.maxDepth}
-          onExportPdf={onExportPdf}
+          onExport={onExport}
           onReset={onReset}
-          isExportingPdf={isExportingPdf}
+          isExporting={isExporting}
           pageSelection={pageSelection}
         />
       ) : (

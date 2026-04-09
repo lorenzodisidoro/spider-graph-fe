@@ -3,21 +3,21 @@
 [![CI](https://github.com/lorenzodisidoro/spider-graph-fe/actions/workflows/ci.yml/badge.svg)](https://github.com/lorenzodisidoro/spider-graph-fe/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](./LICENSE)
 
-Applicazione React per il crawling di pagine e generazione di PDF tramite spider graph.
+React application for page crawling and PDF generation using spider graph.
 
-## Panoramica
+## Overview
 
-- `src/`: componenti, hook, utilità.
-- `public/`: contenuti statici.
-- `build/`: output di produzione.
+- `src/`: components, hooks, utilities.
+- `public/`: static content.
+- `build/`: production output.
 
-## Installazione
+## Installation
 
 ```bash
 npm ci
 ```
 
-## Sviluppo
+## Development
 
 ```bash
 npm start
